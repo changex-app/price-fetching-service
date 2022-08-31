@@ -41,8 +41,7 @@ export async function getCoinsMarketsData(
                 })
             }
         }
-
-        const records = await CurrencyMarket.find().where('coingeckoCode').in(idsFromQueary).exec();
+        const records = await CurrencyMarket.find().where('coingeckoCode').in(idsArrayFromQueary).exec();
         res.status(200).json(records);
     }
 
