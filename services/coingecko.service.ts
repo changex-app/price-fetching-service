@@ -12,7 +12,9 @@ export class CoingeckoService {
         }
         await axios.get(url, urlConfig)
             .then((response)=> {
-                data = response.data;
+                if(response) {
+                    data = response.data;
+                }
             })
             .catch(error => {
                 console.log(error.message)

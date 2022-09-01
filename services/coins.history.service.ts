@@ -12,7 +12,9 @@ export async function updateChartHistory(days:number){
                 prices: any = [];
 
             await coingeckoService.getCoingeckoData(url).then((response)=> {
-                prices = response.prices;
+                if(response && response.length > 0){
+                    prices = response.prices;
+                }
             });
             if(prices && prices.length > 0) {
                 switch (days) {
