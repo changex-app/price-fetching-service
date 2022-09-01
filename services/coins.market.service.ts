@@ -162,7 +162,7 @@ export async function updateCurrencyMarketData(){
 export async function getExchangeRate(currency: any): Promise<number> {
     let url = `${process.env.EXCHANGE_RATE_API}&?base=usd&symbols=${currency}}`,
     returnValue: number = 1;
-
+    console.warn('exchange rate URL: ', url)
     await axios.get(url)
         .then((response)=> {
             if(response && response.data) {
@@ -170,7 +170,8 @@ export async function getExchangeRate(currency: any): Promise<number> {
             }
         })
         .catch((err)=> {
-            console.log('Get exchange rates error: ', err.message)
+            console.log('Get exchange rates error: ', err)
+            console.log('Get exchange rates error message: ', err.message)
         })
 
     return returnValue
