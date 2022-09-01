@@ -134,7 +134,7 @@ export async function updateCurrencyMarketData(){
     if(coins && coins.length > 0) {
         let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=usd`,
             data = await requestMarketsCoingeckoData(url);
-        console.warn('updateCurrencyMarketData on 30 seconds data: ', data.length > 0 ? data : data.length);
+
         if(data && data.length > 0) {
             data.forEach((item: any)=> {
                 let record = {
