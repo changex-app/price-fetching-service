@@ -8,7 +8,7 @@ export const coinsCode: { [key: string]: string } = {
     DAI: 'dai',
     USD_COIN: 'usd-coin',
     UNISWAP: 'uniswap',
-    LOCKTRIP: 'locktrip'
+    LOCKTRIP: 'lockchain'
 };
 
 export async function getCoinsCodeStringByValue (){
