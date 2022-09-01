@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-import { Document } from "mongoose";
+import {Document} from "mongoose";
 
 export interface ICurrencyMarket extends Document  {
     id: string,
@@ -19,7 +19,6 @@ export const currencyMarketSchema = new Schema ({
     id: {
         type: String,
         required: true,
-        unique: true
     },
     name: {
         type: String,

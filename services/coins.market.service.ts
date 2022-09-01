@@ -1,6 +1,7 @@
 import express, {NextFunction} from "express";
-import CurrencyMarket from "../models/currencyMarket";
+import CurrencyMarket, {ICurrencyMarket} from "../models/currencyMarket";
 import axios from "axios";
+import { FiatExchanges } from "../enums/coin-enums";
 
 export async function getCoinsMarketsData(
     req: express.Request,
@@ -16,7 +17,7 @@ export async function getCoinsMarketsData(
     }
 
     let idsFromQueary = res.req.query.ids,
-        vs_currency = res.req.query.vs_currency;
+        vs_currency = res.req.query.vs_currency.toString();
 
     if(idsFromQueary) {
         let idsStr = idsFromQueary.toString(),
@@ -45,6 +46,19 @@ export async function getCoinsMarketsData(
         await new Promise(f => setTimeout(f, 500));
 
         const records = await CurrencyMarket.find().where('id').in(idsArrayFromQueary).exec();
+
+        if(vs_currency !== FiatExchanges.USD){
+            let exchange_rate = await getExchangeRate(vs_currency.toUpperCase());
+            records.forEach((item: ICurrencyMarket)=> {
+                item.current_price = (parseInt(item.current_price) * exchange_rate).toString();
+                item.market_cap = (parseInt(item.market_cap) * exchange_rate * exchange_rate).toString();
+                item.price_change_percentage_24h = (parseInt(item.price_change_percentage_24h) * exchange_rate).toString();
+                item.market_cap_change_24h = (parseInt(item.market_cap_change_24h)  * exchange_rate).toString();
+                item.market_cap_change_percentage_24h = (parseInt(item.market_cap_change_percentage_24h) * exchange_rate).toString();
+                item.total_volume = (parseInt(item.total_volume) * exchange_rate).toString();
+                item.circulating_supply = (parseInt(item.circulating_supply) * exchange_rate).toString();
+            })
+        }
         res.status(200).json(records);
     }
 
@@ -143,4 +157,21 @@ export async function updateCurrencyMarketData(){
             });
         })
     }
+}
+
+export async function getExchangeRate(currency: any): Promise<number> {
+    let url = `${process.env.EXCHANGE_RATE_API}&?base=usd&symbols=${currency}}`,
+    returnValue: number = 1;
+
+    await axios.get(url)
+        .then((response)=> {
+            if(response && response.data) {
+                returnValue = response.data.rates[currency]
+            }
+        })
+        .catch((err)=> {
+            console.log('Get exchange rates error: ', err.message)
+        })
+
+    return returnValue
 }

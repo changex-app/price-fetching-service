@@ -28,7 +28,7 @@ async function checkMarketAndHistoryDatabase() {
         let coinsArr = await getCoinsCodeStringByValue(),
             url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coinsArr.join('%2C')}&vs_currency=usd`,
             data = await requestMarketsCoingeckoData(url);
-
+        console.warn('checkMarketAndHistoryDatabase');
         data.forEach((item: any)=> {
             addNewCurrencyMarketCoin(item)
         })
