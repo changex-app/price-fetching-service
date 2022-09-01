@@ -41,6 +41,9 @@ export async function getCoinsMarketsData(
                 })
             }
         }
+
+        await new Promise(f => setTimeout(f, 500));
+
         const records = await CurrencyMarket.find().where('id').in(idsArrayFromQueary).exec();
         res.status(200).json(records);
     }
