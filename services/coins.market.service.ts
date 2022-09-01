@@ -41,7 +41,7 @@ export async function getCoinsMarketsData(
                 })
             }
         }
-        const records = await CurrencyMarket.find().where('coingeckoCode').in(idsArrayFromQueary).exec();
+        const records = await CurrencyMarket.find().where('id').in(idsArrayFromQueary).exec();
         res.status(200).json(records);
     }
 
@@ -60,7 +60,7 @@ export async function getMarketCoinGeckosIds() {
         }
 
         coins.forEach(function (coin:any){
-            tempArray.push(coin.coingeckoCode)
+            tempArray.push(coin.id)
         })
 
         return tempArray;
@@ -73,14 +73,14 @@ export async function addNewCurrencyMarketCoin(item: any) {
     const marketCoin = new CurrencyMarket({
         id: item.id,
         name: item.name,
-        code: item.symbol,
-        coingeckoCode: item.id,
-        price: item.current_price,
-        marketCap: item.market_cap,
-        pricePercentage24h: item.price_change_percentage_24h,
-        marketCapPercentage24h: item.market_cap_change_percentage_24h,
-        totalVolume: item.total_volume,
-        circulatingSupply: item.circulating_supply,
+        symbol: item.symbol,
+        current_price: item.current_price.toString(),
+        market_cap: item.market_cap.toString(),
+        price_change_percentage_24h: item.price_change_percentage_24h.toString(),
+        market_cap_change_24h: item.market_cap_change_24h.toString(),
+        market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
+        total_volume: item.total_volume.toString(),
+        circulating_supply: item.circulating_supply.toString(),
     });
 
     await marketCoin.save()
@@ -122,17 +122,17 @@ export async function updateCurrencyMarketData(){
             let record = {
                 id: item.id,
                 name: item.name,
-                code: item.symbol,
-                coingeckoCode: item.id,
-                price: item.current_price,
-                marketCap: item.market_cap,
-                pricePercentage24h: item.price_change_percentage_24h,
-                marketCapPercentage24h: item.market_cap_change_percentage_24h,
-                totalVolume: item.total_volume,
-                circulatingSupply: item.circulating_supply
+                symbol: item.symbol,
+                current_price: item.current_price.toString(),
+                market_cap: item.market_cap.toString(),
+                price_change_percentage_24h: item.price_change_percentage_24h.toString(),
+                market_cap_change_24h: item.market_cap_change_24h.toString(),
+                market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
+                total_volume: item.total_volume.toString(),
+                circulating_supply: item.circulating_supply.toString()
             }
 
-            CurrencyMarket.findOneAndUpdate({id: record.id},record, {
+            CurrencyMarket.findOneAndUpdate({id: record.id}, record, {
                 new: true,
                 upsert: true
             }).catch((err: any) => {

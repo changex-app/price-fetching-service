@@ -3,10 +3,12 @@ export const coinsCode: { [key: string]: string } = {
     ETH: 'ethereum',
     HYDRA: 'hydra',
     CHANGE: 'changex',
-    TETHER: 'tether',
+    USDT: 'tether',
     TRON: 'tron',
     DAI: 'dai',
-    USD_COIN: 'usd-coin'
+    USD_COIN: 'usd-coin',
+    UNISWAP: 'uniswap',
+    LOCKTRIP: 'locktrip'
 };
 
 export async function getCoinsCodeStringByValue (){

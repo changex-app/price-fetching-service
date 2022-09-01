@@ -5,14 +5,14 @@ import { Document } from "mongoose";
 export interface ICurrencyMarket extends Document  {
     id: string,
     name: string
-    code: string,
-    coingeckoCode: string,
-    price: number,
-    marketCap: number,
-    pricePercentage24h: number,
-    marketCapPercentage24h: number,
-    totalVolume: number,
-    circulatingSupply: number,
+    symbol: string,
+    current_price: string,
+    market_cap: string,
+    price_change_percentage_24h: string,
+    market_cap_change_24h: string,
+    market_cap_change_percentage_24h: string,
+    total_volume: string,
+    circulating_supply: string,
 }
 
 export const currencyMarketSchema = new Schema ({
@@ -25,38 +25,37 @@ export const currencyMarketSchema = new Schema ({
         type: String,
         required: true
     },
-    code: {
+    symbol: {
         type: String,
         required: true
     },
-    coingeckoCode: {
+    current_price: {
         type: String,
         required: true,
-        unique: true
-    },
-    price: {
-        type: Number,
-        required: true,
         float: true
     },
-    marketCap: {
-        type: Number,
+    market_cap: {
+        type: String,
         float: true
     },
-    pricePercentage24h: {
-        type: Number,
+    price_change_percentage_24h: {
+        type: String,
         float: true
     },
-    marketCapPercentage24h: {
-        type: Number,
+    market_cap_change_24h: {
+        type: String,
         float: true
     },
-    totalVolume: {
-        type: Number,
+    market_cap_change_percentage_24h: {
+        type: String,
         float: true
     },
-    circulatingSupply: {
-        type: Number,
+    total_volume: {
+        type: String,
+        float: true
+    },
+    circulating_supply: {
+        type: String,
         float: true
     }
 }, { collection: "CurrencyMarket" }

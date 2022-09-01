@@ -35,15 +35,8 @@ export async function updateChartHistory(days:number){
 }
 
 async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: string) {
-    let result: any = [];
-    prices.forEach((item: any)=>{
-        result.push({
-            timestamp: item[0],
-            price: item[1]
-        })
-    })
-
-    return await CurrencyHistory.findOneAndUpdate({coingeckoCode: coinId}, {[keyForUpdate]: result}, {
+    console.warn('updateCoinHistoryData');
+    return await CurrencyHistory.findOneAndUpdate({id: coinId}, {[keyForUpdate]: prices}, {
         new: true,
         upsert: true
     }).catch((err: any) => {
@@ -56,7 +49,7 @@ export async function getCoingeckoCoinsIdsFromDB() {
     try {
          await CurrencyHistory.find({}).then((resp: [ICurrencyHistory])=> {
             resp.forEach(function (coin:any){
-                tempArray.push(coin.coingeckoCode);
+                tempArray.push(coin.id);
             })
         })
     } catch (err) {
@@ -98,7 +91,7 @@ export async function getCoinHystoryData(
         }
     } else {
         let newRecord = await addNewCurrencyHistoryCoin(coinId, vs_currency);
-        await getCoinHistoryDataBasedOnDays(newRecord.coingeckoCode, days.toString())
+        await getCoinHistoryDataBasedOnDays(newRecord.id, days.toString())
             .then((resp)=>{
                 return res.status(200).json(resp);
             });
@@ -137,12 +130,7 @@ async function makeCoingeckoRequest(url: string): Promise<any> {
             .then((response)=> {
                 let data = response.data;
                 if(data) {
-                    data.prices.forEach((item: any)=> {
-                        pricesArray!.push({
-                            timestamp: item[0],
-                            price: item[1]
-                        });
-                    })
+                    pricesArray = data.prices
                 }})
             .catch((error)=> {
                 console.log(` ${url} error:`, error.response)
@@ -163,19 +151,19 @@ export async function initailUpdateOfTheDatabase(coins: Array<string>): Promise<
 
 async function getCoinHistoryDataBasedOnDays(coinId: string, days: string): Promise<any>{
     let data;
-    await CurrencyHistory.find({coingeckoCode: coinId}).then((response: any)=> {
+    await CurrencyHistory.find({id: coinId}).then((response: any)=> {
         switch (days){
             case '1':
-                data = response[0].dayHistoryData;
+                data = { prices: response[0].dayHistoryData };
                 break;
             case '7':
-                data = response[0].weekHistoryData;
+                data = { prices: response[0].dayHistoryData };
                 break;
             case '30':
-                data = response[0].monthHistoryData;
+                data = { prices: response[0].dayHistoryData };
                 break;
             case '365':
-                data = response[0].yearHistoryData;
+                data = { prices: response[0].dayHistoryData };
                 break;
         }
     })

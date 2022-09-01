@@ -2,18 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 import { Document } from "mongoose";
 
-export interface IHistoryData extends Document  {
-    timestamp: string,
-    price: number
-}
-
 export interface ICurrencyHistory extends Document {
     id: string,
     coingeckoCode: string,
-    dayHistoryData: IHistoryData[],
-    weekHistoryData: IHistoryData[],
-    monthHistoryData: IHistoryData[],
-    yearHistoryData: IHistoryData[]
+    dayHistoryData: Array<string[]>,
+    weekHistoryData: Array<string[]>,
+    monthHistoryData: Array<string[]>,
+    yearHistoryData: Array<string[]>
 }
 
 export const currencyHistorySchema = new Schema ({
@@ -24,33 +19,24 @@ export const currencyHistorySchema = new Schema ({
         },
         coingeckoCode: {
             type: String,
-            required: true,
-            unique: true
+            required: true
         },
-        dayHistoryData: [
-            {
-                timestamp: Number,
-                price: Number
-            }
-        ],
-        weekHistoryData: [
-            {
-                timestamp: Number,
-                price: Number
-            }
-        ],
-        monthHistoryData: [
-            {
-                timestamp: Number,
-                price: Number
-            }
-        ],
-        yearHistoryData: [
-            {
-                timestamp: Number,
-                price: Number
-            }
-        ]
+        dayHistoryData: {
+            type: Array,
+            required: true
+        },
+        weekHistoryData: {
+            type: Array,
+            required: true
+        },
+        monthHistoryData: {
+            type: Array,
+            required: true
+        },
+        yearHistoryData: {
+            type: Array,
+            required: true
+        }
     }, {collection: 'CurrencyHistory'}
 );
 
