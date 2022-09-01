@@ -50,13 +50,13 @@ export async function getCoinsMarketsData(
         if(vs_currency !== FiatExchanges.USD){
             let exchange_rate = await getExchangeRate(vs_currency.toUpperCase());
             records.forEach((item: ICurrencyMarket)=> {
-                item.current_price = (parseInt(item.current_price) * exchange_rate).toString();
-                item.market_cap = (parseInt(item.market_cap) * exchange_rate * exchange_rate).toString();
-                item.price_change_percentage_24h = (parseInt(item.price_change_percentage_24h) * exchange_rate).toString();
-                item.market_cap_change_24h = (parseInt(item.market_cap_change_24h)  * exchange_rate).toString();
-                item.market_cap_change_percentage_24h = (parseInt(item.market_cap_change_percentage_24h) * exchange_rate).toString();
-                item.total_volume = (parseInt(item.total_volume) * exchange_rate).toString();
-                item.circulating_supply = (parseInt(item.circulating_supply) * exchange_rate).toString();
+                item.current_price = (parseFloat(item.current_price) * exchange_rate).toString();
+                item.market_cap = (parseFloat(item.market_cap) * exchange_rate * exchange_rate).toString();
+                item.price_change_percentage_24h = (parseFloat(item.price_change_percentage_24h) * exchange_rate).toString();
+                item.market_cap_change_24h = (parseFloat(item.market_cap_change_24h)  * exchange_rate).toString();
+                item.market_cap_change_percentage_24h = (parseFloat(item.market_cap_change_percentage_24h) * exchange_rate).toString();
+                item.total_volume = (parseFloat(item.total_volume) * exchange_rate).toString();
+                item.circulating_supply = (parseFloat(item.circulating_supply) * exchange_rate).toString();
             })
         }
         res.status(200).json(records);
