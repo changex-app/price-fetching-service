@@ -134,28 +134,30 @@ export async function updateCurrencyMarketData(){
     if(coins && coins.length > 0) {
         let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=usd`,
             data = await requestMarketsCoingeckoData(url);
+        console.warn('updateCurrencyMarketData on 30 seconds data: ', data.length > 0 ? data ? data.length);
+        if(data && data.length > 0) {
+            data.forEach((item: any)=> {
+                let record = {
+                    id: item.id,
+                    name: item.name,
+                    symbol: item.symbol,
+                    current_price: item.current_price.toString(),
+                    market_cap: item.market_cap.toString(),
+                    price_change_percentage_24h: item.price_change_percentage_24h.toString(),
+                    market_cap_change_24h: item.market_cap_change_24h.toString(),
+                    market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
+                    total_volume: item.total_volume.toString(),
+                    circulating_supply: item.circulating_supply.toString()
+                }
 
-        data.forEach((item: any)=> {
-            let record = {
-                id: item.id,
-                name: item.name,
-                symbol: item.symbol,
-                current_price: item.current_price.toString(),
-                market_cap: item.market_cap.toString(),
-                price_change_percentage_24h: item.price_change_percentage_24h.toString(),
-                market_cap_change_24h: item.market_cap_change_24h.toString(),
-                market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
-                total_volume: item.total_volume.toString(),
-                circulating_supply: item.circulating_supply.toString()
-            }
-
-            CurrencyMarket.findOneAndUpdate({id: record.id}, record, {
-                new: true,
-                upsert: true
-            }).catch((err: any) => {
-                console.warn('CurrencyMarket findOneAndUpdate: ', err)
-            });
-        })
+                CurrencyMarket.findOneAndUpdate({id: record.id}, record, {
+                    new: true,
+                    upsert: true
+                }).catch((err: any) => {
+                    console.warn('CurrencyMarket findOneAndUpdate: ', err)
+                });
+            })
+        }
     }
 }
 
