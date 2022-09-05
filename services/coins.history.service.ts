@@ -158,13 +158,13 @@ async function getCoinHistoryDataBasedOnDays(coinId: string, days: string): Prom
                 data = { prices: response[0].dayHistoryData };
                 break;
             case '7':
-                data = { prices: response[0].dayHistoryData };
+                data = { prices: response[0].weekHistoryData };
                 break;
             case '30':
-                data = { prices: response[0].dayHistoryData };
+                data = { prices: response[0].monthHistoryData };
                 break;
             case '365':
-                data = { prices: response[0].dayHistoryData };
+                data = { prices: response[0].yearHistoryData };
                 break;
         }
     })
