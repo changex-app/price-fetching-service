@@ -1,13 +1,14 @@
 import { CronJob } from 'cron'
 import { updateChartHistory } from '../services/coins.history.service';
 import { updateCurrencyMarketData } from "../services/coins.market.service";
-import axios from "axios";
 
 export const updateCoinsData = () => {
     //At every 30 seconds.
     new CronJob('*/30 * * * * *', async () =>{
        await updateCurrencyMarketData()
-           .catch(err => console.log('When updating currency market on 30 esconds' + err.message));
+           .catch(err =>
+               console.log('When updating currency market on 30 esconds :', err, 'message:' + err.message))
+
     }).start();
 
     //At every 40th minute.

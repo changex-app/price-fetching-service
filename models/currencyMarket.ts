@@ -6,13 +6,14 @@ export interface ICurrencyMarket extends Document  {
     id: string,
     name: string
     symbol: string,
-    current_price: string,
-    market_cap: string,
-    price_change_percentage_24h: string,
-    market_cap_change_24h: string,
-    market_cap_change_percentage_24h: string,
-    total_volume: string,
-    circulating_supply: string,
+    current_price: number,
+    market_cap: number,
+    price_change_percentage_24h: number,
+    market_cap_change_24h: number,
+    market_cap_change_percentage_24h: number,
+    total_volume: number,
+    circulating_supply: number,
+    exchange_rate: string
 }
 
 export const currencyMarketSchema = new Schema ({
@@ -29,33 +30,38 @@ export const currencyMarketSchema = new Schema ({
         required: true
     },
     current_price: {
-        type: String,
+        type: Number,
         required: true,
         float: true
     },
     market_cap: {
-        type: String,
+        type: Number,
         float: true
     },
     price_change_percentage_24h: {
-        type: String,
+        type: Number,
         float: true
     },
     market_cap_change_24h: {
-        type: String,
+        type: Number,
         float: true
     },
     market_cap_change_percentage_24h: {
-        type: String,
+        type: Number,
         float: true
     },
     total_volume: {
-        type: String,
+        type: Number,
         float: true
     },
     circulating_supply: {
-        type: String,
+        type: Number,
         float: true
+    },
+    exchange_rate: {
+        type: String,
+        required: true
+
     }
 }, { collection: "CurrencyMarket" }
 );

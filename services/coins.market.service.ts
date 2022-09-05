@@ -1,7 +1,7 @@
 import express, {NextFunction} from "express";
 import CurrencyMarket, {ICurrencyMarket} from "../models/currencyMarket";
 import axios from "axios";
-import { FiatExchanges } from "../enums/coin-enums";
+import {FiatExchanges, getFiatExchanges} from "../enums/coin-enums";
 
 export async function getCoinsMarketsData(
     req: express.Request,
@@ -33,8 +33,7 @@ export async function getCoinsMarketsData(
 
         if(missingCoinArr.length > 0) {
             //Add missing requested coin to database
-            let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${missingCoinArr.join('%2C')}&vs_currency=${vs_currency}`,
-                data = await requestMarketsCoingeckoData(url);
+            let data = await requestMarketsCoingeckoData(missingCoinArr);
 
             if(data) {
                 data.forEach((item: any) => {
@@ -45,20 +44,8 @@ export async function getCoinsMarketsData(
 
         await new Promise(f => setTimeout(f, 500));
 
-        const records = await CurrencyMarket.find().where('id').in(idsArrayFromQueary).exec();
+        const records = await CurrencyMarket.find({exchange_rate: vs_currency}).where('id').in(idsArrayFromQueary).exec();
 
-        if(vs_currency !== FiatExchanges.USD){
-            let exchange_rate = await getExchangeRate(vs_currency.toUpperCase());
-            records.forEach((item: ICurrencyMarket)=> {
-                item.current_price = (parseFloat(item.current_price) * exchange_rate).toString();
-                item.market_cap = (parseFloat(item.market_cap) * exchange_rate * exchange_rate).toString();
-                item.price_change_percentage_24h = (parseFloat(item.price_change_percentage_24h) * exchange_rate).toString();
-                item.market_cap_change_24h = (parseFloat(item.market_cap_change_24h)  * exchange_rate).toString();
-                item.market_cap_change_percentage_24h = (parseFloat(item.market_cap_change_percentage_24h) * exchange_rate).toString();
-                item.total_volume = (parseFloat(item.total_volume) * exchange_rate).toString();
-                item.circulating_supply = (parseFloat(item.circulating_supply) * exchange_rate).toString();
-            })
-        }
         res.status(200).json(records);
     }
 
@@ -91,13 +78,14 @@ export async function addNewCurrencyMarketCoin(item: any) {
         id: item.id,
         name: item.name,
         symbol: item.symbol,
-        current_price: item.current_price.toString(),
-        market_cap: item.market_cap.toString(),
-        price_change_percentage_24h: item.price_change_percentage_24h.toString(),
-        market_cap_change_24h: item.market_cap_change_24h.toString(),
-        market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
-        total_volume: item.total_volume.toString(),
-        circulating_supply: item.circulating_supply.toString(),
+        current_price:  item.current_price,
+        market_cap: item.market_cap,
+        price_change_percentage_24h: item.price_change_percentage_24h,
+        market_cap_change_24h: item.market_cap_change_24h,
+        market_cap_change_percentage_24h: item.market_cap_change_percentage_24h,
+        total_volume: item.total_volume,
+        circulating_supply: item.circulating_supply,
+        exchange_rate: item.exchange_rate
     });
 
     await marketCoin.save()
@@ -109,22 +97,31 @@ export async function addNewCurrencyMarketCoin(item: any) {
         });
 }
 
-export async function requestMarketsCoingeckoData(url: string): Promise<any> {
-    let response: any[] = [];
-    try {
-        await axios.get(url)
-            .then((res)=> {
-                if(res.data){
-                    response = res.data;
-                }
-            })
-            .catch(function (error){
-                console.log(` ${url} error:`, error.response)
-            })
-    } catch (err) {
-        console.log(`Try axios GET ${url} error:`, err)
-    }
+export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
+    let response: any[] = [],
+        fiatExchangeRates = await getFiatExchanges();
 
+    fiatExchangeRates.forEach((exchange_rate)=> {
+        let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=${exchange_rate}`;
+        try {
+            axios.get(url)
+                .then((res)=> {
+                    if(res.data){
+                        res.data.forEach((item: any)=> {
+                            item.exchange_rate = exchange_rate;
+                            response.push(item);
+                        })
+                    }
+                })
+                .catch(function (error){
+                    console.log(`${new Date().getTime()}: ${url}error:`, error.response)
+                })
+        } catch (err) {
+            console.log(`Try axios GET ${url} error:`, err)
+        }
+    })
+
+    await new Promise(f => setTimeout(f, 1000));
     return response;
 }
 
@@ -132,8 +129,7 @@ export async function updateCurrencyMarketData(){
     let coins = await getMarketCoinGeckosIds();
 
     if(coins && coins.length > 0) {
-        let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=usd`,
-            data = await requestMarketsCoingeckoData(url);
+        let data = await requestMarketsCoingeckoData(coins);
 
         if(data && data.length > 0) {
             data.forEach((item: any)=> {
@@ -141,16 +137,17 @@ export async function updateCurrencyMarketData(){
                     id: item.id,
                     name: item.name,
                     symbol: item.symbol,
-                    current_price: item.current_price.toString(),
-                    market_cap: item.market_cap.toString(),
-                    price_change_percentage_24h: item.price_change_percentage_24h.toString(),
-                    market_cap_change_24h: item.market_cap_change_24h.toString(),
-                    market_cap_change_percentage_24h: item.market_cap_change_percentage_24h.toString(),
-                    total_volume: item.total_volume.toString(),
-                    circulating_supply: item.circulating_supply.toString()
+                    current_price:  item.current_price,
+                    market_cap: item.market_cap,
+                    price_change_percentage_24h: item.price_change_percentage_24h,
+                    market_cap_change_24h: item.market_cap_change_24h,
+                    market_cap_change_percentage_24h: item.market_cap_change_percentage_24h,
+                    total_volume: item.total_volume,
+                    circulating_supply: item.circulating_supply,
+                    exchange_rate: item.exchange_rate
                 }
 
-                CurrencyMarket.findOneAndUpdate({id: record.id}, record, {
+                CurrencyMarket.findOneAndUpdate({id: record.id, exchange_rate: record.exchange_rate}, record, {
                     new: true,
                     upsert: true
                 }).catch((err: any) => {

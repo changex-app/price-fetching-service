@@ -37,7 +37,6 @@ export async function updateChartHistory(days:number){
 }
 
 async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: string) {
-    console.warn('updateCoinHistoryData');
     return await CurrencyHistory.findOneAndUpdate({id: coinId}, {[keyForUpdate]: prices}, {
         new: true,
         upsert: true
