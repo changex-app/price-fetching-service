@@ -12,10 +12,11 @@ export async function updateChartHistory(days:number){
                 prices: any = [];
 
             await coingeckoService.getCoingeckoData(url).then((response)=> {
-                if(response && response.length > 0){
+                if(response && response.prices.length > 0){
                     prices = response.prices;
                 }
             });
+
             if(prices && prices.length > 0) {
                 switch (days) {
                     case 1:
@@ -37,7 +38,23 @@ export async function updateChartHistory(days:number){
 }
 
 async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: string) {
-    return await CurrencyHistory.findOneAndUpdate({id: coinId}, {[keyForUpdate]: prices}, {
+    let update = {};
+    switch (keyForUpdate) {
+        case 'dayHistoryData':
+            update = {dayHistoryData: prices};
+            break;
+        case 'weekHistoryData':
+            update = {weekHistoryData: prices};
+            break;
+        case 'monthHistoryData':
+            update = {monthHistoryData: prices};
+            break;
+        case 'yearHistoryData':
+            update = {yearHistoryData: prices};
+            break;
+    }
+
+    return await CurrencyHistory.findOneAndUpdate({id: coinId}, update, {
         new: true,
         upsert: true
     }).catch((err: any) => {
