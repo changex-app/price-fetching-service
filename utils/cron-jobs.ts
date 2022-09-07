@@ -30,7 +30,7 @@ export const updateCoinsData = () => {
     }).start();
 
     //At minute 15 past every 24th hour.
-    new CronJob('10 */24 * * *', async () => {
+    new CronJob('15 */24 * * *', async () => {
         await updateChartHistory(365)
             .catch(err => console.log('When updating year requests ' + err.message));
     }).start();
