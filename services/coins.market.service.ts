@@ -1,7 +1,7 @@
 import express, {NextFunction} from "express";
-import CurrencyMarket  from "../models/currencyMarket";
+import CurrencyMarket from "../models/currencyMarket";
 import axios from "axios";
-import { getFiatExchanges } from "../enums/coin-enums";
+import {getFiatExchanges} from "../enums/coin-enums";
 
 export async function getCoinsMarketsData(
     req: express.Request,
@@ -62,7 +62,8 @@ export async function getMarketCoinGeckosIds() {
             tempArray.push(coin.id)
         })
 
-        return tempArray;
+        return tempArray.filter((v: any, i: any, a: any) => a.indexOf(v) === i);
+
     } catch (err) {
         console.log('getMarketCoinGeckosIds', err);
     }
