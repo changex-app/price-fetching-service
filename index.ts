@@ -3,7 +3,6 @@ import cors from 'cors';
 import path from "path";
 import dotenv from 'dotenv';
 import router from "./routes/router";
-import { updateCoinsData } from "./utils/cron-jobs";
 import { connectToDatabases } from "./connections/database";
 
 const app = express();
@@ -28,5 +27,5 @@ app.listen(process.env.PORT, () => {
 
 connectToDatabases()
 
-updateCoinsData()
+
 

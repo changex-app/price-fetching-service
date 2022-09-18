@@ -1,4 +1,4 @@
-import express, {NextFunction} from "express";
+import express, { NextFunction } from "express";
 import axios from 'axios';
 import CurrencyHistory, { ICurrencyHistory } from "../models/currencyHistory";
 import { CoingeckoService } from "./coingecko.service";
@@ -160,9 +160,9 @@ async function makeCoingeckoRequest(url: string): Promise<any> {
 }
 
 export async function initailUpdateOfTheDatabase(coins: Array<string>): Promise<boolean> {
-    coins.forEach((coin)=> {
-        addNewCurrencyHistoryCoin(coin, 'usd')
-    })
+    for (const coin of coins) {
+        await addNewCurrencyHistoryCoin(coin, 'usd')
+    }
 
     return await new Promise(f => setTimeout(f, 2000));
 }

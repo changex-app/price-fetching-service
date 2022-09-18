@@ -1,16 +1,13 @@
 import express, {NextFunction} from "express";
-import CurrencyMarket, {ICurrencyMarket} from "../models/currencyMarket";
+import CurrencyMarket  from "../models/currencyMarket";
 import axios from "axios";
-import {FiatExchanges, getFiatExchanges} from "../enums/coin-enums";
+import { getFiatExchanges } from "../enums/coin-enums";
 
 export async function getCoinsMarketsData(
     req: express.Request,
     res: express.Response,
     next: NextFunction
 ){
-    /*
-     Return all object from the database that are containing in the string of coins/
-    */
     if (!res.req.query.ids || !res.req.query.vs_currency) {
         console.error('Missing one of params: `coin ids, `vs_currency`');
         return res.status(400).json({ status: 'Missing one of params: `coin ids, `vs_currency`'});
@@ -36,13 +33,11 @@ export async function getCoinsMarketsData(
             let data = await requestMarketsCoingeckoData(missingCoinArr);
 
             if(data) {
-                data.forEach((item: any) => {
-                    addNewCurrencyMarketCoin(item);
-                })
+                for (const item of data){
+                  await addNewCurrencyMarketCoin(item);
+                }
             }
         }
-
-        await new Promise(f => setTimeout(f, 500));
 
         const records = await CurrencyMarket.find({exchange_rate: vs_currency}).where('id').in(idsArrayFromQueary).exec();
 
@@ -90,7 +85,7 @@ export async function addNewCurrencyMarketCoin(item: any) {
 
     await marketCoin.save()
         .then(()=> {
-            console.log('New Coin addded to CurrencyMarket collection', marketCoin.id);
+            console.log('New Coin addded to CurrencyMarket collection', marketCoin.id, marketCoin.exchange_rate );
         })
         .catch((err: any) => {
             console.log('Tried to add new Coin to CurrencyMarket collection', err);
@@ -101,10 +96,10 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
     let response: any[] = [],
         fiatExchangeRates = await getFiatExchanges();
 
-    fiatExchangeRates.forEach((exchange_rate)=> {
+    for (const exchange_rate of fiatExchangeRates) {
         let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=${exchange_rate}`;
         try {
-            axios.get(url)
+           await axios.get(url)
                 .then((res)=> {
                     if(res.data){
                         res.data.forEach((item: any)=> {
@@ -119,9 +114,8 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
         } catch (err) {
             console.log(`Try axios GET ${url} error:`, err)
         }
-    })
+    }
 
-    await new Promise(f => setTimeout(f, 1000));
     return response;
 }
 
@@ -132,7 +126,7 @@ export async function updateCurrencyMarketData(){
         let data = await requestMarketsCoingeckoData(coins);
 
         if(data && data.length > 0) {
-            data.forEach((item: any)=> {
+            for (const item of data) {
                 let record = {
                     id: item.id,
                     name: item.name,
@@ -147,13 +141,13 @@ export async function updateCurrencyMarketData(){
                     exchange_rate: item.exchange_rate
                 }
 
-                CurrencyMarket.findOneAndUpdate({id: record.id, exchange_rate: record.exchange_rate}, record, {
+                await CurrencyMarket.findOneAndUpdate({id: record.id, exchange_rate: record.exchange_rate}, record, {
                     new: true,
                     upsert: true
                 }).catch((err: any) => {
                     console.warn('CurrencyMarket findOneAndUpdate: ', err)
                 });
-            })
+            }
         }
     }
 }
