@@ -99,6 +99,10 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
 
     for (const exchange_rate of fiatExchangeRates) {
         let url = `${process.env.COINGECKO_API_URL}coins/markets?ids=${coins.join('%2C')}&vs_currency=${exchange_rate}`;
+
+        //Replace is done because sometimes " ` " is replaced with encoding %27,
+        url.replace('%27,', '');
+
         try {
            await axios.get(url)
                 .then((res)=> {
