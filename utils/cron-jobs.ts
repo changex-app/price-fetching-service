@@ -4,7 +4,7 @@ import { updateCurrencyMarketData } from "../services/coins.market.service";
 
 export const updateCoinsData = () => {
     //At every 30 seconds.
-    new CronJob('*/30 * * * * *', async () =>{
+    new CronJob('*/10 * * * *', async () =>{
        await updateCurrencyMarketData()
            .catch(err =>
                console.log('When updating currency market on 30 esconds :', err, 'message:' + err.message))
