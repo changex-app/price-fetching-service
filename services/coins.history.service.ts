@@ -10,6 +10,8 @@ export async function updateChartHistory(days:number){
         for (let coin of coins) {
             let url = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=${days}&vs_currency=usd`,
                 prices: any = [];
+            url.replace('%27,', '');
+            console.warn('url', url);
 
             await coingeckoService.getCoingeckoData(url).then((response)=> {
                 if(response && response.prices.length > 0){
