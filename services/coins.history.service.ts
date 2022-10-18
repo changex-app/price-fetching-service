@@ -85,8 +85,8 @@ export async function getCoinHystoryData(
     next: NextFunction
 ){
     if (!res.req.query.days || !res.req.query.vs_currency || !res.req.url) {
-        console.error('Missing one of params: `days, `vs_currency`, `url`');
-        return res.status(400).json({ status: 'Missing one of params: `days, `vs_currency`, `url`'});
+        next(new Error('Missing one of params: `coin ids, `vs_currency`'));
+        return;
     }
 
     let coinId =  res.req.url.split("/")[2],

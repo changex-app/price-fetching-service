@@ -9,8 +9,8 @@ export async function getCoinsMarketsData(
     next: NextFunction
 ){
     if (!res.req.query.ids || !res.req.query.vs_currency) {
-        console.error('Missing one of params: `coin ids, `vs_currency`');
-        return res.status(400).json({ status: 'Missing one of params: `coin ids, `vs_currency`'});
+        next(new Error('Missing one of params: `coin ids, `vs_currency`'));
+        return;
     }
 
     let idsFromQueary = res.req.query.ids,
@@ -43,8 +43,6 @@ export async function getCoinsMarketsData(
 
         res.status(200).json(records);
     }
-
-    next();
 }
 
 export async function getMarketCoinGeckosIds() {
