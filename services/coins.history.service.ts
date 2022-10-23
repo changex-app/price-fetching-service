@@ -152,11 +152,8 @@ async function makeCoingeckoRequest(url: string): Promise<any> {
                 if(data) {
                     pricesArray = data.prices
                 }})
-            .catch((error)=> {
-                console.log(` ${url} error:`, error.response)
-            })
     } catch (err) {
-        console.log(`Try axios GET ${url} error:`, err)
+        throw new Error(`Try axios GET  ${url} error: ${err}`)
     }
     return pricesArray;
 }

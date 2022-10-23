@@ -111,11 +111,8 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
                         })
                     }
                 })
-                .catch(function (error){
-                    console.log(`${new Date().getTime()}: ${url}error:`, error.response)
-                })
         } catch (err) {
-            console.log(`Try axios GET ${url} error:`, err)
+            throw new Error(`${new Date().getTime()} : ${url}} error: ${err}`);
         }
     }
 

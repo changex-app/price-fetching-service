@@ -17,7 +17,7 @@ export class CoingeckoService {
                 }
             })
             .catch(error => {
-                console.log(error.message)
+                throw new Error(`GET: ${url} ERROR: ${error.message}`);
             })
         return data
     }
