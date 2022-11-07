@@ -19,7 +19,7 @@ export async function getCoinsMarketsData(
     if(idsFromQueary) {
         let idsStr = idsFromQueary.toString(),
             idsArrayFromQueary = idsStr.split(','),
-            coinsfromDB = await getMarketCoinGeckosIds() || [],
+            coinsfromDB = await getMarketCoinGeckosIds(),
             missingCoinArr: string[] = [];
 
         idsArrayFromQueary!.forEach((item)=> {
