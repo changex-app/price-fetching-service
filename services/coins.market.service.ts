@@ -46,21 +46,16 @@ export async function getCoinsMarketsData(
 }
 
 export async function getMarketCoinGeckosIds() {
-    let coins: any,
-        tempArray: Array<string> = [];
+    let coins: any;
 
     try {
-        coins = await CurrencyMarket.find({})
+        coins = await CurrencyMarket.distinct("id")
         if (coins == null) {
             console.log('Coins are empty');
             return;
         }
 
-        coins.forEach(function (coin:any){
-            tempArray.push(coin.id)
-        })
-
-        return tempArray.filter((v: any, i: any, a: any) => a.indexOf(v) === i);
+        return coins;
 
     } catch (err) {
         console.log('getMarketCoinGeckosIds', err);

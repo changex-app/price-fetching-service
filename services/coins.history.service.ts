@@ -2,6 +2,7 @@ import express, { NextFunction } from "express";
 import axios from 'axios';
 import CurrencyHistory, { ICurrencyHistory } from "../models/currencyHistory";
 import { CoingeckoService } from "./coingecko.service";
+import * as CONSTANTS from "constants";
 const coingeckoService = new CoingeckoService();
 
 export async function updateChartHistory(days:number){
@@ -66,12 +67,9 @@ async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: 
 
 export async function getCoingeckoCoinsIdsFromDB() {
     let tempArray: Array<string> = [];
+
     try {
-         await CurrencyHistory.find({}).then((resp: [ICurrencyHistory])=> {
-            resp.forEach(function (coin:any){
-                tempArray.push(coin.id);
-            })
-        })
+        tempArray = await CurrencyHistory.distinct("id");
     } catch (err) {
         console.log('getCoingeckoCoinsIdsFromDB', err);
     }
