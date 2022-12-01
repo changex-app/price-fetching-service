@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: price-fetcher-environment
+  namespace: price-fetcher-staging
+type: Opaque
+
+stringData:
+  PORT: "8081"
+  NODE_ENV: "development"
+  DATABASE_URL: " "
+  DATABASE_NAME: " "
+  DOCKER_SECRET: " "
+  GITHUB_TOKEN: " "
