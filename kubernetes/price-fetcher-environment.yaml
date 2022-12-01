@@ -10,5 +10,3 @@ stringData:
   NODE_ENV: "development"
   DATABASE_URL: " "
   DATABASE_NAME: " "
-  DOCKER_SECRET: " "
-  GITHUB_TOKEN: " "
