@@ -1,12 +1,21 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: price-fetcher-environment
+  name: price-fetcher-secrets
   namespace: price-fetcher-staging
 type: Opaque
 
 stringData:
-  PORT: "8081"
-  NODE_ENV: "development"
   DATABASE_URL: " "
-  DATABASE_NAME: " "
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: price-fetcher-environment
+  namespace: price-fetcher-staging
+
+data:
+  PORT: "8081"
+  NODE_ENV: "DEVELOPMENT"

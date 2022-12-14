@@ -26,13 +26,15 @@ spec:
     spec:
       containers:
       - name: price-fetcher
-        image: price-fetcher
-        imagePullPolicy: IfNotPresent
+        image: price-fetcher:staging
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
           name: fetcher-port
         envFrom:
           - secretRef:
+              name: price-fetcher-secrets
+          - configMapRef:
               name: price-fetcher-environment
       restartPolicy: Always
 

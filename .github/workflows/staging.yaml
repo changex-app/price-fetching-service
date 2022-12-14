@@ -3,7 +3,7 @@ name: Create and publish a container with 'staging' tag
 on:
   push:
     branches:
-      - 'qa'
+      - 'staging'
   workflow_dispatch:
     inputs:
       image_tag:
