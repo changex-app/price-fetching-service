@@ -60,10 +60,10 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
            await axios.get(url)
                 .then((res)=> {
                     if(res.data) {
-                        res.data.forEach((item: any) => {
+                        for (let item of res.data) {
                             item.exchange_rate = exchange_rate;
                             response.push(item);
-                        });
+                        }
                     }
                 });
         } catch (err) {
