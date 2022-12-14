@@ -13,18 +13,16 @@ export async function getCoinsMarketsData(
     res: express.Response,
     next: NextFunction
 ){
-    const params = req.params;
+    const query = req.query;
 
-    console.warn('params', req.params);
-
-    if (!params['ids'] || !params['vs_currency']) {
+    if (!query['ids'] || !query['vs_currency']) {
         logger.error('Missing one of params: `coin ids, `vs_currency`');
         next(new HttpException(400, 'Missing one of params: `coin ids, `vs_currency'));
     }
 
-    let idsFromQueary = params['ids'],
+    let idsFromQueary = query['ids'],
         // @ts-ignore
-        vs_currency = params['vs_currency'].toString();
+        vs_currency = query['vs_currency'].toString();
 
     if(idsFromQueary) {
         try {

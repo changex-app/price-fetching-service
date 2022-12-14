@@ -13,19 +13,17 @@ export async function getCoinHystoryData(
     next: NextFunction
 ){
 
-    const params = req.params;
+    const query = req.query;
 
-    console.warn('params', req.params);
-
-    if (!params['days'] || !params['vs_currency'] || !params['url']) {
+    if (!query['days'] || !query['vs_currency'] || !req.originalUrl) {
         logger.error('Missing one of params: `days, `vs_currency`, `url`');
         next(new HttpException(400, 'Missing one of params: `days, `vs_currency`, `url`'));
     }
 
     try {
-        let coinId =  params['url'].split("/")[2],
-            days = params['days'],
-            vs_currency = params['vs_currency'],
+        let coinId =  req.originalUrl.split("/")[2],
+            days = query['days'],
+            vs_currency = query['vs_currency'],
             coinsArrayInDB = await getCoingeckoCoinsIdsFromDB(),
             coinExists = false;
 
@@ -34,6 +32,7 @@ export async function getCoinHystoryData(
         }
 
         if(coinExists){
+            // @ts-ignore
             await getCoinHistoryDataBasedOnDays(coinId, days.toString())
                 .then((resp)=> {
                     return res.status(200).json(resp);
@@ -44,6 +43,7 @@ export async function getCoinHystoryData(
                     throw new Error(err);
                 });
 
+            // @ts-ignore
             await getCoinHistoryDataBasedOnDays(newRecord.id, days.toString())
                 .then((resp)=>{
                     return res.status(200).json(resp);
