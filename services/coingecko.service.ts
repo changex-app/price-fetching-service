@@ -1,7 +1,7 @@
 import axios from "axios";
+import HttpException from "../classes/HttpException";
 
 export class CoingeckoService {
-
     public async getCoingeckoData(url: string): Promise<any>{
         let data;
         let urlConfig = {
@@ -17,8 +17,8 @@ export class CoingeckoService {
                 }
             })
             .catch(error => {
-                throw new Error(`GET: ${url} ERROR: ${error.message}`);
+                new HttpException(400, error);
             })
-        return data
+        return data;
     }
 }

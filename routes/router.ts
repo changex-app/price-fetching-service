@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import { getCoinHystoryData } from "../services/coins.history.service";
-import { getCoinsMarketsData } from "../services/coins.market.service";
 import { getDatabaseConnectionStatus } from "../connections/healthcheck";
+import { getCoinHystoryData } from "../controller/coins-history";
+import { getCoinsMarketsData } from "../controller/coins-market";
 
 const router = Router();
 

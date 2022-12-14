@@ -1,46 +1,52 @@
-import express, { NextFunction } from "express";
 import axios from 'axios';
 import CurrencyHistory, { ICurrencyHistory } from "../models/currencyHistory";
 import { CoingeckoService } from "./coingecko.service";
-import * as CONSTANTS from "constants";
+import logger from "../utils/logger";
+import { COINGECKO_API_URL } from "../config/config";
+import HttpException from "../classes/HttpException";
 const coingeckoService = new CoingeckoService();
 
 export async function updateChartHistory(days:number){
     const coins = await getCoingeckoCoinsIdsFromDB();
+
     if(coins) {
-        for (let coin of coins) {
-            let url = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=${days}&vs_currency=usd`,
-                prices: any = [];
+        try {
+            for (let coin of coins) {
+                let url = `${COINGECKO_API_URL}coins/${coin}/market_chart?days=${days}&vs_currency=usd`,
+                    prices: any = [];
 
-            url.replace('%27,', '');
+                url.replace('%27,', '');
 
-            await coingeckoService.getCoingeckoData(url).then((response)=> {
-                if(response && response.prices.length > 0){
-                    prices = response.prices;
-                }
-            });
+                await coingeckoService.getCoingeckoData(url).then((response)=> {
+                    if(response && response.prices.length > 0){
+                        prices = response.prices;
+                    }
+                });
 
-            if(prices && prices.length > 0) {
-                switch (days) {
-                    case 1:
-                        await updateCoinHistoryData(coin, prices, 'dayHistoryData');
-                        break;
-                    case 7:
-                        await updateCoinHistoryData(coin, prices, 'weekHistoryData');
-                        break;
-                    case 30:
-                        await updateCoinHistoryData(coin, prices, 'monthHistoryData');
-                        break;
-                    case 365:
-                        await updateCoinHistoryData(coin, prices, 'yearHistoryData');
-                        break;
+                if(prices && prices.length > 0) {
+                    switch (days) {
+                        case 1:
+                            await updateCoinHistoryData(coin, prices, 'dayHistoryData');
+                            break;
+                        case 7:
+                            await updateCoinHistoryData(coin, prices, 'weekHistoryData');
+                            break;
+                        case 30:
+                            await updateCoinHistoryData(coin, prices, 'monthHistoryData');
+                            break;
+                        case 365:
+                            await updateCoinHistoryData(coin, prices, 'yearHistoryData');
+                            break;
+                    }
                 }
             }
+        } catch (err: any) {
+            throw new Error(err)
         }
     }
 }
 
-async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: string) {
+export async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: string) {
     let update = {};
     switch (keyForUpdate) {
         case 'dayHistoryData':
@@ -61,7 +67,7 @@ async function updateCoinHistoryData(coinId: string, prices: any, keyForUpdate: 
         new: true,
         upsert: true
     }).catch((err: any) => {
-        console.warn('CurrencyHistory findOneAndUpdate: ', err)
+        throw new Error(err);
     });
 }
 
@@ -71,77 +77,41 @@ export async function getCoingeckoCoinsIdsFromDB() {
     try {
         tempArray = await CurrencyHistory.distinct("id");
     } catch (err) {
-        console.log('getCoingeckoCoinsIdsFromDB', err);
+        logger.error(`getCoingeckoCoinsIdsFromDB'${err}`);
     }
 
    return tempArray;
 }
 
-export async function getCoinHystoryData(
-    req: express.Request,
-    res: express.Response,
-    next: NextFunction
-){
-    if (!res.req.query.days || !res.req.query.vs_currency || !res.req.url) {
-        next(new Error('Missing one of params: `coin ids, `vs_currency`'));
-        return;
+export async function addNewCurrencyHistoryCoin(coin: string, currency: any): Promise<ICurrencyHistory>{
+    try {
+        let url1 = `${COINGECKO_API_URL}coins/${coin}/market_chart?days=1&vs_currency=${currency}`,
+            url7 = `${COINGECKO_API_URL}coins/${coin}/market_chart?days=7&vs_currency=${currency}`,
+            url30 = `${COINGECKO_API_URL}coins/${coin}/market_chart?days=30&vs_currency=${currency}`,
+            url365 = `${COINGECKO_API_URL}coins/${coin}/market_chart?days=365&vs_currency=${currency}`,
+            dayHistoryData: Promise<any> = await  makeCoingeckoRequest(url1),
+            weekHistoryData: Promise<any> =  await makeCoingeckoRequest(url7),
+            montHistoryData: Promise<any> =  await makeCoingeckoRequest(url30),
+            yearHistoryData: Promise<any> =  await makeCoingeckoRequest(url365);
+
+        let currencyHistory = new CurrencyHistory ({
+            id: coin,
+            coingeckoCode: coin,
+            dayHistoryData: dayHistoryData,
+            weekHistoryData: weekHistoryData,
+            monthHistoryData: montHistoryData,
+            yearHistoryData: yearHistoryData
+        })
+
+        await currencyHistory.save();
+
+        return currencyHistory;
+    } catch (err: any) {
+        throw Error(err);
     }
-
-    let coinId =  res.req.url.split("/")[2],
-        days = res.req.query.days,
-        vs_currency = res.req.query.vs_currency,
-        coinsArrayInDB = await getCoingeckoCoinsIdsFromDB(),
-        coinExists = false;
-
-    if(coinsArrayInDB?.includes(coinId)) {
-        coinExists = true
-    }
-
-    if(coinExists){
-        try{
-             await getCoinHistoryDataBasedOnDays(coinId, days.toString())
-                .then((resp)=> {
-                    return res.status(200).json(resp);
-                });
-
-        } catch (err){
-            res.status(500).send(err);
-        }
-    } else {
-        let newRecord = await addNewCurrencyHistoryCoin(coinId, vs_currency);
-        await getCoinHistoryDataBasedOnDays(newRecord.id, days.toString())
-            .then((resp)=>{
-                return res.status(200).json(resp);
-            });
-    }
-
-    next();
 }
 
-async function addNewCurrencyHistoryCoin(coin: string, currency: any): Promise<ICurrencyHistory>{
-    let url1 = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=1&vs_currency=${currency}`,
-        url7 = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=7&vs_currency=${currency}`,
-        url30 = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=30&vs_currency=${currency}`,
-        url365 = `${process.env.COINGECKO_API_URL}coins/${coin}/market_chart?days=365&vs_currency=${currency}`,
-        dayHistoryData: Promise<any> = await  makeCoingeckoRequest(url1),
-        weekHistoryData: Promise<any> =  await makeCoingeckoRequest(url7),
-        montHistoryData: Promise<any> =  await makeCoingeckoRequest(url30),
-        yearHistoryData: Promise<any> =  await makeCoingeckoRequest(url365);
-
-    let currencyHistory = new CurrencyHistory ({
-        id: coin,
-        coingeckoCode: coin,
-        dayHistoryData: dayHistoryData,
-        weekHistoryData: weekHistoryData,
-        monthHistoryData: montHistoryData,
-        yearHistoryData: yearHistoryData
-    })
-
-    await currencyHistory.save();
-    return currencyHistory;
-}
-
-async function makeCoingeckoRequest(url: string): Promise<any> {
+export async function makeCoingeckoRequest(url: string): Promise<any> {
     let pricesArray: any[] = [];
     try {
         await axios.get(url)
@@ -150,21 +120,24 @@ async function makeCoingeckoRequest(url: string): Promise<any> {
                 if(data) {
                     pricesArray = data.prices
                 }})
-    } catch (err) {
-        throw new Error(`Try axios GET  ${url} error: ${err}`)
+    } catch (err: any) {
+        new HttpException(400, err)
     }
     return pricesArray;
 }
 
-export async function initailUpdateOfTheDatabase(coins: Array<string>): Promise<boolean> {
+export async function initailUpdateOfTheDatabase(coins: Array<string>): Promise<void> {
     for (const coin of coins) {
-        await addNewCurrencyHistoryCoin(coin, 'usd')
+        try {
+            await addNewCurrencyHistoryCoin(coin, 'usd')
+        } catch (err: any) {
+            logger.error('Fail database initial update');
+            throw new Error(err)
+        }
     }
-
-    return await new Promise(f => setTimeout(f, 2000));
 }
 
-async function getCoinHistoryDataBasedOnDays(coinId: string, days: string): Promise<any>{
+export async function getCoinHistoryDataBasedOnDays(coinId: string, days: string): Promise<any>{
     let data;
     await CurrencyHistory.find({id: coinId}).then((response: any)=> {
         switch (days){
