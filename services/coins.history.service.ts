@@ -129,6 +129,7 @@ export async function makeCoingeckoRequest(url: string): Promise<any> {
 export async function initailUpdateOfTheDatabase(coins: Array<string>): Promise<void> {
     for (const coin of coins) {
         try {
+            await new Promise(f => setTimeout(f, 2000));
             await addNewCurrencyHistoryCoin(coin, 'usd')
         } catch (err: any) {
             logger.error('Fail database initial update');
