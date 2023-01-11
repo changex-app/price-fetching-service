@@ -57,3 +57,15 @@ export async function getCoinsMarketsData(
     }
 }
 
+
+export async function getAllCoins(  req: express.Request,
+                                     res: express.Response,
+                                     next: NextFunction
+){
+    const coinsfromDB = await getMarketCoinGeckosIds()
+        .catch((err)=> {
+            next(new HttpException(500, err));
+        })
+
+    res.status(200).json(coinsfromDB);
+}
