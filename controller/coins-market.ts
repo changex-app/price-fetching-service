@@ -22,7 +22,7 @@ export async function getCoinsMarketsData(
 
     let idsFromQueary = query['ids'],
         // @ts-ignore
-        vs_currency = query['vs_currency'].toString();
+        vs_currency = query['vs_currency'] ?  query['vs_currency'].toString() : 'usd';
 
     if(idsFromQueary) {
         try {
