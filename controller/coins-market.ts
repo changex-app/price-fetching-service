@@ -62,10 +62,11 @@ export async function getAllCoins(  req: express.Request,
                                      res: express.Response,
                                      next: NextFunction
 ){
-    const coinsfromDB = await getMarketCoinGeckosIds()
-        .catch((err)=> {
-            next(new HttpException(500, err));
-        })
+    try {
+        const coinsfromDB = await getMarketCoinGeckosIds();
 
-    res.status(200).json(coinsfromDB);
+        res.status(200).json(coinsfromDB);
+    } catch (err: any) {
+        next(new HttpException(500, err));
+    }
 }
