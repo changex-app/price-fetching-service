@@ -75,7 +75,10 @@ export async function requestMarketsCoingeckoData(coins: any): Promise<any> {
 }
 
 export async function updateCurrencyMarketData(){
-    let coins = await getMarketCoinGeckosIds();
+    let coins = await getMarketCoinGeckosIds()
+        .catch((err)=> {
+            throw new Error(err);
+        });
 
     if(coins && coins.length > 0) {
         try {
